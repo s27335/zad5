@@ -40,8 +40,8 @@ app.MapGet("/api/animals", () => Results.Ok(_animals))
 
 app.MapGet("/api/animals/{id:int}", (int id) =>
     {
-        var animal = _animals.FirstOrDefault(a => a.id == id);
-        return animal == null ? Results.NotFound("Animal with id " + id + " was not found") : Results.Ok(animal);
+        var animalToFind = _animals.FirstOrDefault(a => a.id == id);
+        return animalToFind == null ? Results.NotFound("Animal with id " + id + " was not found") : Results.Ok(animalToFind);
     })
     .WithName("GetAnimal")
     .WithOpenApi();
@@ -82,7 +82,14 @@ app.MapDelete("/api/animals/{id:int}", (int id) =>
     .WithOpenApi();
 
 //Visits
-app.MapGet("/api/visits/", () => Results.Ok(_visits))
+app.MapGet("/api/visits/{id:int}", (int id) =>
+    {
+        foreach (var visit in _visits)
+        {
+            
+        }
+        return;
+    })
     .WithName("Get visits")
     .WithOpenApi();
 
