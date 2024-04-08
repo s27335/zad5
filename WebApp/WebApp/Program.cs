@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +26,65 @@ var _animals = new List<Animal>()
     new Animal{id = 3, name = "", category = "dog", weight = 10.2, colour = "brown"}
 };
 
+var _visits = new List<Visit>()
+{
+    new Visit{id =1, animal = _animals[0],date = new DateTime(2024,4,8),description = "operation", price = 100},
+    new Visit{id = 2, animal = _animals[1],date = new DateTime(2024,4,10), description = "short visit", price = 50},
+    new Visit{id = 3, animal = _animals[1],date = new DateTime(2024,4,15), description = "operation", price = 100}
+    };
+
+//Animals
 app.MapGet("/api/animals", () => Results.Ok(_animals))
-    .WithName("Animals")
+    .WithName("GetAnimals")
     .WithOpenApi();
+
+app.MapGet("/api/animals/{id:int}", (int id) =>
+    {
+        var animal = _animals.FirstOrDefault(a => a.id == id);
+        return animal == null ? Results.NotFound("Animal with id " + id + " was not found") : Results.Ok(animal);
+    })
+    .WithName("GetAnimal")
+    .WithOpenApi();
+
+app.MapPost("/api/animals", (Animal animal) =>
+    {
+    _animals.Add(animal);
+    return Results.StatusCode(StatusCodes.Status201Created);
+    })
+    .WithName("CreateAnimal");
+
+app.MapPut("/api/animals/{id:int}", (int id, Animal animal) =>
+    {
+    var animalToUpdate = _animals.FirstOrDefault(a => a.id == id);
+    if (animalToUpdate == null)
+    {
+        return Results.NotFound("Student with id " + id + " was not found");
+    }
+    _animals.Remove(animalToUpdate);
+    _animals.Add(animal);
+
+    return Results.NoContent();
+    })
+    .WithName("UpdateAnimal")
+    .WithOpenApi();
+
+app.MapDelete("/api/animals/{id:int}", (int id) =>
+    {
+        var animalToDelete = _animals.FirstOrDefault(a => a.id == id);
+        if (animalToDelete == null)
+        {
+            return Results.NotFound("Student with id " + id + " was not found");
+        }
+        _animals.Remove(animalToDelete);
+        return Results.NoContent();
+    })
+    .WithName("DeleteAnimal")
+    .WithOpenApi();
+
+//Visits
+app.MapGet("/api/visits/", () => Results.Ok(_visits))
+    .WithName("Get visits")
+    .WithOpenApi();
+
 
 app.Run();
