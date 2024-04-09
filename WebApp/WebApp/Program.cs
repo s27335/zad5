@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,10 +47,11 @@ app.MapGet("/api/animals/{id:int}", (int id) =>
 
 app.MapPost("/api/animals", (Animal animal) =>
     {
-    _animals.Add(animal);
-    return Results.StatusCode(StatusCodes.Status201Created);
+        _animals.Add(animal);
+        return Results.StatusCode(StatusCodes.Status201Created);
     })
-    .WithName("CreateAnimal");
+    .WithName("CreateAnimal")
+    .WithOpenApi();
 
 app.MapPut("/api/animals/{id:int}", (int id, Animal animal) =>
     {
@@ -84,13 +84,30 @@ app.MapDelete("/api/animals/{id:int}", (int id) =>
 //Visits
 app.MapGet("/api/visits/{id:int}", (int id) =>
     {
-        foreach (var visit in _visits)
+        List<Visit> animalVisits = new List<Visit>();
+        foreach (Visit visit in _visits)
         {
-            
+            if (visit.animal.id == id)
+            {
+                animalVisits.Add(visit);
+            }
         }
-        return;
+
+        if (!animalVisits.Any())
+        {
+            return Results.NotFound("There isn't any visit with animal" + id);
+        }
+        return Results.Ok(animalVisits);
     })
-    .WithName("Get visits")
+    .WithName("GetVisits")
+    .WithOpenApi();
+
+app.MapPost("/api/visits", (Visit visit) =>
+    {
+        _visits.Add(visit);
+        return Results.NoContent();
+    })
+    .WithName("CreateVisit")
     .WithOpenApi();
 
 
